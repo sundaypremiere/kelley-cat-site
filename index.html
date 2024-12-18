@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐈 🎁</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        height: 100vh;
+        background-color: #eac2ff61;
+      }
+
+      .marquee {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: #c550fb;
+        color: white;
+        overflow: hidden;
+        white-space: nowrap;
+        z-index: 10; /* Ensures it stays on top of other elements */
+        padding: 10px 0;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      .marquee-content {
+        display: inline-flex; /* Arrange items in a row */
+        padding-left: 100%;
+        gap: 300px; /* Space between each message */
+        animation: marquee 30s linear infinite; /* Smooth scrolling */
+      }
+
+      @keyframes marquee {
+        from {
+          transform: translateX(0%);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      #catButton {
+        position: fixed;
+        bottom: 20px; /* Space from the bottom */
+        right: 20px; /* Space from the right */
+        font-size: 4rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        z-index: 10; /* Ensure it’s above other elements */
+      }
+
+      #catButton:hover {
+        transform: scale(1.2); /* Slight zoom on hover */
+        transition: transform 0.2s;
+      }
+
+      .image,
+      .fixed-image {
+        filter: drop-shadow(4px 4px 0px white) drop-shadow(-4px -4px 0px white)
+          drop-shadow(4px -4px 0px white) drop-shadow(-4px 4px 0px white);
+        border-radius: 1px;
+        background: none;
+        pointer-events: none; /* Prevent mouse events */
+      }
+
+      .image {
+        position: absolute;
+        max-width: 100px;
+        height: auto;
+      }
+      .fixed-image {
+        position: fixed;
+        bottom: -30px;
+        left: 50%; /* Centered horizontally */
+        transform: translateX(-50%);
+        width: 400px; /* Fixed width */
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="marquee">
+      <div class="marquee-content">
+        <span>😭 It's been almost two years without beast... 😭</span>
+        <span> 😻 It's about time Kelley gets a new cat! 😻</span>
+        <span>📆 Coming...sometime in 2025! 📆</span>
+        <span>🥚 + 🐉 + 🐈 = 🎉</span>
+      </div>
+    </div>
+
+    <button id="catButton">🐈</button>
+
+    <!-- Floating Images -->
+    <img src="images/tolle-1.jpeg" class="image" id="img1" />
+    <img src="images/tolle-2.jpeg" class="image" id="img2" />
+    <img src="images/tolle-3.jpeg" class="image" id="img3" />
+    <img src="images/tolle-4.jpeg" class="image" id="img4" />
+    <img src="images/tolle-5.jpeg" class="image" id="img5" />
+    <img src="images/tolle-6.jpeg" class="image" id="img6" />
+    <img src="images/tolle-7.jpeg" class="image" id="img7" />
+    <img src="images/tolle-8.jpeg" class="image" id="img8" />
+    <img src="images/totoro Large.jpeg" class="image" id="img9" />
+
+    <!-- Fixed Image -->
+    <img src="images/kelley.jpeg" class="fixed-image" id="fixedImage" />
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+      // Add the confetti button functionality
+      document.getElementById("catButton").addEventListener("click", () => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      });
+
+      const images = document.querySelectorAll(".image");
+      const fixedImage = document.getElementById("fixedImage");
+      const repelDistance = 200; // Increased distance for larger fixed image
+      const floatSpeed = 0.5; // Speed of floating motion
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+
+      // Track mouse position
+      document.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      images.forEach((image) => {
+        let posX = Math.random() * (window.innerWidth - 100); // Start positions
+        let posY = Math.random() * (window.innerHeight - 100);
+        let velocityX = 0;
+        let velocityY = 0;
+        let floatOffsetX = Math.random() * Math.PI * 2;
+        let floatOffsetY = Math.random() * Math.PI * 2;
+
+        function animate() {
+          const dx = posX - mouseX;
+          const dy = posY - mouseY;
+          const distanceToMouse = Math.hypot(dx, dy);
+
+          // Fixed image position
+          const fixedRect = fixedImage.getBoundingClientRect();
+          const fixedX = fixedRect.left + fixedRect.width / 2;
+          const fixedY = fixedRect.top + fixedRect.height / 2;
+          const fixedDX = posX - fixedX;
+          const fixedDY = posY - fixedY;
+          const distanceToFixed = Math.hypot(fixedDX, fixedDY);
+
+          // Repel from cursor
+          if (distanceToMouse < repelDistance) {
+            const angle = Math.atan2(dy, dx);
+            velocityX += Math.cos(angle) * 3;
+            velocityY += Math.sin(angle) * 3;
+          }
+
+          // Repel from fixed image
+          if (distanceToFixed < repelDistance) {
+            const angle = Math.atan2(fixedDY, fixedDX);
+            velocityX += Math.cos(angle) * 3;
+            velocityY += Math.sin(angle) * 3;
+          }
+
+          // Floating motion (sinusoidal)
+          floatOffsetX += floatSpeed * 0.01;
+          floatOffsetY += floatSpeed * 0.01;
+          posX += Math.sin(floatOffsetX) * floatSpeed;
+          posY += Math.cos(floatOffsetY) * floatSpeed;
+
+          // Smooth velocity damping
+          velocityX *= 0.9;
+          velocityY *= 0.9;
+
+          posX += velocityX;
+          posY += velocityY;
+
+          // Keep images within the screen boundaries
+          posX = Math.max(0, Math.min(window.innerWidth - 100, posX));
+          posY = Math.max(0, Math.min(window.innerHeight - 100, posY));
+
+          // Update image position
+          image.style.transform = `translate(${posX}px, ${posY}px)`;
+
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      });
+    </script>
+  </body>
+</html>
